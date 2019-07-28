@@ -36,11 +36,15 @@ vector<string_view> parse_line(string_view line) {
 }
 
 void relation_parser::parse(const string &filename,
-                            const function<void(vector<string_view>)>& collector) {
+                            const function<void(vector<string_view>)> &collector) {
     std::ifstream ifile;
     ifile.open(filename);
     std::string line;
+    int doc_count = 0;
     while (std::getline(ifile, line)) {
         collector(parse_line(line));
+        if (++doc_count % 10000 == 0) {
+            cout << "processing. done:" << doc_count << endl;
+        }
     }
 }
