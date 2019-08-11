@@ -11,11 +11,11 @@
 #include <ostream>
 #include <atomic>
 #include <set>
+#include <functional>
 #include "unique_id.h"
 #include "vocabulary.h"
 
 using namespace std;
-
 
 class Edge : public has_unique_id {
 public:
@@ -116,11 +116,13 @@ public:
 
     shared_ptr<Edge> get_edge(has_unique_id::uid id);
 
-    map<shared_ptr<TokenNode>, int> get_tokenised_nodes(string_view content);
-
     size_t node_count();
 
     size_t edge_count();
+
+    void prune(const function<bool(shared_ptr<Node>)> & must_remove);
+
+    void iterate_nodes(const function<void(shared_ptr<Node>)>&reporter);
 
     void print_size() const;
 

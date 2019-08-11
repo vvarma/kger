@@ -8,12 +8,12 @@
 
 #include <string>
 #include <functional>
+#include <vector>
 
-using namespace std;
 
 class relation_parser {
 public:
-    void parse(const string &filename, const function<void(vector<string_view>)>& collector);
+    void parse(const std::string &filename, const std::function<void(std::vector<std::string_view>)>& collector);
 
 };
 

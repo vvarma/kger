@@ -7,6 +7,7 @@
 
 #include "graph.h"
 #include "unique_id.h"
+#include "node.h"
 
 
 void GraphBuilder::relation_collector(vector<string_view> finds) {
@@ -16,21 +17,21 @@ void GraphBuilder::relation_collector(vector<string_view> finds) {
     shared_ptr<Node> subject = parse_entity(finds[0]);
     shared_ptr<Node> object = parse_entity(finds[2]);
     shared_ptr<Edge> predicate = parse_relation(finds[1]);
-    auto translatedPredicate = predicate->translation();
-    if (translatedPredicate.empty()) {
-        subject->add_relation(predicate, object);
-        object->add_relation(predicate, subject);
-    } else if (translatedPredicate == "token") {
-//        if (subject->relations.empty())
-//            return;
-        predicate = registery->get_edge(translatedPredicate);
-        auto termCounts = registery->get_tokenised_nodes(object->get_content());
-        for (const auto &p:termCounts) {
-            p.first->add_term_count(subject->unique_id(), p.second);
-            subject->add_relation(predicate, p.first);
-            p.first->add_relation(predicate, subject);
-        }
-    }
+//    auto translatedPredicate = predicate->translation();
+    subject->add_relation(predicate, object);
+//    object->add_relation(predicate, subject);
+//    if (translatedPredicate.empty()) {
+//    } else if (translatedPredicate == "token") {
+////        if (subject->relations.empty())
+////            return;
+//        predicate = registery->get_edge(translatedPredicate);
+//        auto termCounts = registery->get_tokenised_nodes(object->get_content());
+//        for (const auto &p:termCounts) {
+//            p.first->add_term_count(subject->unique_id(), p.second);
+//            subject->add_relation(predicate, p.first);
+//            p.first->add_relation(predicate, subject);
+//        }
+//    }
 }
 
 shared_ptr<Node> GraphBuilder::parse_entity(string_view view) {
@@ -103,35 +104,24 @@ Registery::Registery(shared_ptr<Vocabulary> v) : vocabulary(move(v)) {
 
 }
 
-map<shared_ptr<TokenNode>, int> Registery::get_tokenised_nodes(string_view content) {
-    auto termFrequencies = vocabulary->process(string(content));
-    map<shared_ptr<TokenNode>, int> termNodes;
-    for (pair<int, int> tf:termFrequencies) {
-        auto it = token_node_cache.find(tf.first);
-        if (it == token_node_cache.end()) {
-            auto tn = make_shared<TokenNode>(vocabulary->get_token(tf.first), tf.first);
-            token_node_cache[tf.first] = tn->unique_id();
-            nodes[tn->unique_id()] = tn;
-            termNodes[tn] = tf.second;
-        } else {
-            auto tn = dynamic_pointer_cast<TokenNode>(nodes[token_node_cache[tf.first]]);
-            if (tn->is_stop) {
-                continue;
-            } else if (vocabulary->is_stop(tn->getVocabId(), 0.1)) {
-                tn->mark_as_stop();
-            } else {
-                termNodes[tn] = tf.second;
-            }
-
-        }
-    }
-    return termNodes;
-
-}
-
 void Registery::print_size() const {
     cout << "size of registery:" << sizeof(this) << endl;
 
+}
+
+void Registery::prune(const function<bool(shared_ptr<Node>)> &must_remove) {
+    for (auto it = nodes.begin(); it != nodes.end();) {
+        if (must_remove(it->second)) {
+            nodes.erase(it);
+        }
+        ++it;
+    }
+}
+
+void Registery::iterate_nodes(const function<void(shared_ptr<Node>)> &reporter) {
+    for (auto &node : nodes) {
+        reporter(node.second);
+    }
 }
 
 EntityNode::EntityNode(string node) : ContentNode(std::move(node)) {
@@ -223,3 +213,4 @@ void TokenNode::mark_as_stop() {
     relations.clear();
     cout << "marked token as stop:" << get_content() << endl;
 }
+

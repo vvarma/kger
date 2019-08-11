@@ -20,6 +20,7 @@ public:
     has_unique_id(has_unique_id &&) noexcept;
 
     has_unique_id &operator=(const has_unique_id &) noexcept;
+    virtual ~has_unique_id();
 
 protected:
     has_unique_id();

@@ -8,24 +8,26 @@
 #include <sentencepiece_processor.h>
 #include <map>
 
-using namespace std;
 
 class Vocabulary {
     sentencepiece::SentencePieceProcessor processor;
-    map<int, int> documentFrequencies;
+    std::map<int, int> documentFrequencies;
 public:
     bool ok;
     int numDocs;
 
-    Vocabulary(const string &model_path);
+    Vocabulary(const std::string &model_path);
 
-    map<int, int> process(const string &text);
+    std::map<int, int> process(const std::string &text);
+
+    std::vector<int> tokenize(const std::string &text);
 
     int get_doc_count(int vocabId) const;
 
-    string get_token(int vocabId) const;
+    int get_num_tokens() const;
 
-    bool is_stop(int vocabId, float threshold) const;
+    int get_padding_id() const;
+
 };
 
 #endif //KGER_VOCABULARY_H

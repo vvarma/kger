@@ -25,3 +25,7 @@ has_unique_id &has_unique_id::operator=(const has_unique_id &) noexcept {
 has_unique_id::has_unique_id() : m_id(++next) {
 
 }
+
+has_unique_id::~has_unique_id() {
+
+}

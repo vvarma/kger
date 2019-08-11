@@ -2,19 +2,18 @@
 // Created by nvr on 21/7/19.
 //
 
-#include <iostream>
 #include "vocabulary.h"
 
-Vocabulary::Vocabulary(const string &model_path) {
+Vocabulary::Vocabulary(const std::string &model_path) {
     auto status = processor.Load(model_path);
     ok = status.ok();
     numDocs = 0;
 }
 
-map<int, int> Vocabulary::process(const string &text) {
-    vector<int> ids;
+std::map<int, int> Vocabulary::process(const std::string &text) {
+    std::vector<int> ids;
     processor.Encode(text, &ids);
-    map<int, int> termFrequencies;
+    std::map<int, int> termFrequencies;
     for (int id:ids) {
         auto it = termFrequencies.find(id);
         if (it == termFrequencies.end()) {
@@ -23,7 +22,7 @@ map<int, int> Vocabulary::process(const string &text) {
             ++termFrequencies[id];
         }
     }
-    for (pair<int, int> p:termFrequencies) {
+    for (auto p:termFrequencies) {
         auto it = documentFrequencies.find(p.first);
         if (it == documentFrequencies.end()) {
             documentFrequencies[p.first] = 1;
@@ -43,10 +42,16 @@ int Vocabulary::get_doc_count(int vocabId) const {
     return it->second;
 }
 
-string Vocabulary::get_token(int vocabId) const {
-    return processor.DecodeIds({vocabId});
+std::vector<int> Vocabulary::tokenize(const std::string &text) {
+    std::vector<int> ids;
+    processor.Encode(text, &ids);
+    return ids;
 }
 
-bool Vocabulary::is_stop(int vocabId, float threshold) const {
-    return numDocs > 100000 && get_doc_count(vocabId) > numDocs * threshold;
+int Vocabulary::get_num_tokens() const {
+    return processor.GetPieceSize();
+}
+
+int Vocabulary::get_padding_id() const {
+    return processor.pad_id();
 }

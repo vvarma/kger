@@ -3,12 +3,11 @@
 //
 
 #include <fstream>
-#include <vector>
 #include <iostream>
 #include "relation_parser.h"
 
-vector<string_view> parse_line(string_view line) {
-    vector<string_view> finds;
+std::vector<std::string_view> parse_line(std::string_view line) {
+    std::vector<std::string_view> finds;
     if (line.empty())
         return finds;
     if (line.at(0) == '#')
@@ -35,8 +34,8 @@ vector<string_view> parse_line(string_view line) {
     return finds;
 }
 
-void relation_parser::parse(const string &filename,
-                            const function<void(vector<string_view>)> &collector) {
+void relation_parser::parse(const std::string &filename,
+                            const std::function<void(std::vector<std::string_view>)> &collector) {
     std::ifstream ifile;
     ifile.open(filename);
     std::string line;
@@ -44,7 +43,7 @@ void relation_parser::parse(const string &filename,
     while (std::getline(ifile, line)) {
         collector(parse_line(line));
         if (++doc_count % 10000 == 0) {
-            cout << "processing. done:" << doc_count << endl;
+            std::cout << "processing. done:" << doc_count << std::endl;
         }
     }
 }
