@@ -39,14 +39,27 @@ GraphDataset::GraphDataset(std::shared_ptr<Graph> g, const std::shared_ptr<Vocab
                 this->tokens.push_back(ln->tokens);
                 this->labels.push_back(nen->unique_id());
                 auto neid = nen->unique_id();
-                if (label_map.find(neid) == label_map.end())
+                if (label_map.find(neid) == label_map.end()) {
                     label_map[neid] = label_count++;
+                    label_count_map[neid] = 1;
+                } else {
+                    label_count_map[neid]++;
+                }
                 if (ln->tokens.size() > max_token_length)
                     max_token_length = ln->tokens.size();
             }
         }
     });
 
+}
+
+torch::Tensor GraphDataset::labelWeights() const {
+    std::vector<float> w(label_count);
+    for (auto p:label_count_map) {
+        auto it = label_map.find(p.first);
+        w[it->second] = static_cast<float>(p.second) / labels.size();
+    }
+    return torch::tensor(w, torch::TensorOptions().device(device).requires_grad(false));
 }
 
 

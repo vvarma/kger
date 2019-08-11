@@ -20,11 +20,12 @@ struct SequenceExample {
                                                                                      sizes(std::move(sizes)),
                                                                                      labels(std::move(labels)) {}
 };
-struct Stack :public torch::data::transforms::Collation<SequenceExample>{
+
+struct Stack : public torch::data::transforms::Collation<SequenceExample> {
     SequenceExample apply_batch(std::vector<SequenceExample> input_batch) override;
 };
 
-class GraphDataset : public torch::data::datasets::Dataset<GraphDataset, SequenceExample> {
+struct GraphDataset : public torch::data::datasets::Dataset<GraphDataset, SequenceExample> {
     int label_count;
     int max_token_length;
     int padding_id;
@@ -32,7 +33,8 @@ class GraphDataset : public torch::data::datasets::Dataset<GraphDataset, Sequenc
     std::vector<std::vector<int>> tokens;
     std::vector<has_unique_id::uid> labels;
     std::map<has_unique_id::uid, int> label_map;
-public:
+    std::map<has_unique_id::uid, int> label_count_map;
+
     explicit GraphDataset(std::shared_ptr<Graph> g, const std::shared_ptr<Vocabulary> &vocabulary,
                           torch::Device device);
 
@@ -41,6 +43,8 @@ public:
     c10::optional<size_t> size() const override;
 
     int get_label_count() const;
+
+    torch::Tensor labelWeights() const;
 };
 
 #endif //KGER_GRAPHDATASET_H

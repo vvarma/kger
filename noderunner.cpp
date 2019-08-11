@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
         device = torch::kCUDA;
     }
     auto graph_dataset = GraphDataset(std::move(graph), vocabulary, device);
+    auto label_weights = graph_dataset.labelWeights();
+    std::cout << "weight sum:" << label_weights.sum() << std::endl;
     auto dataset = graph_dataset.map(Stack());
     auto batches_per_epoch = dataset.size();
     auto loader = torch::data::make_data_loader(std::move(dataset),
@@ -86,10 +88,11 @@ int main(int argc, char *argv[]) {
         for (SequenceExample &batch : *loader) {
             builder->zero_grad();
             auto op = builder(batch.data, batch.sizes);
-            auto loss = torch::nll_loss(op, batch.labels);
+            auto loss = torch::nll_loss(op, batch.labels, label_weights
+            );
             loss.backward();
             optimizer.step();
-            if (++batch_index%1000==0){
+            if (++batch_index % 1000 == 0) {
                 std::printf(
                         "\n[%2ld/%2d][%3ld/%3ld] loss: %.4f",
                         epoch,
