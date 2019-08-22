@@ -1,0 +1,28 @@
+cc_library(
+    name = "graph",
+    srcs = [
+        "node.cpp",
+        "unique_id.cpp",
+    ],
+    hdrs = [
+        "node.h",
+        "unique_id.h",
+    ],
+    deps = [],
+)
+
+cc_library(
+    name = "graph_io",
+    srcs = ["graph_io.cpp"],
+    hdrs = ["graph_io.h"],
+    deps = [
+        ":graph",
+        "//proto:graph_proto_lib",
+    ],
+)
+
+cc_binary(
+    name = "kger",
+    srcs = ["kger.cpp"],
+    deps = [":graph_io"],
+)
