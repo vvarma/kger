@@ -1,3 +1,4 @@
+bazel-*
 includes
 cmake-build-debug/
 .idea

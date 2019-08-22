@@ -1,0 +1,38 @@
+syntax = "proto3";
+package graph;
+message NamedEntityNode {
+    string label = 1;
+    repeated int64 parents = 2;
+}
+message InstanceNode {
+    message Relation {
+        int64 edgeId = 1;
+        repeated int64 instances = 2;
+    }
+    repeated Relation relations = 1;
+}
+message EntityNode {
+    string resource = 1;
+    oneof type {
+        NamedEntityNode named = 2;
+        InstanceNode instance = 3;
+    }
+}
+message LexicalNode {
+    repeated int32 tokens = 1;
+}
+message Node {
+    int64 id = 1;
+    oneof type {
+        EntityNode entity = 2;
+        LexicalNode lexical = 3;
+    }
+}
+message Edge {
+    int64 id = 1;
+    string resource = 2;
+}
+message Graph{
+    repeated Node nodes = 1;
+    repeated Edge edges = 2;
+}
