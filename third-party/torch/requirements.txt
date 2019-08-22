@@ -1,0 +1,10 @@
+numpy
+ninja
+pyyaml
+mkl
+mkl-include
+setuptools
+cmake
+cffi
+typing
+magma-cuda100
