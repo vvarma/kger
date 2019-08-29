@@ -1,6 +1,6 @@
 project(wikiparser)
 
-add_library(${PROJECT_NAME} relation_parser.cpp)
+add_library(${PROJECT_NAME} STATIC relation_parser.cpp)
 add_library(libs::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC

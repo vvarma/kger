@@ -11,7 +11,9 @@
 #include <vector>
 
 
-
-void parserelation(const std::string &filename, const std::function<void(std::vector<std::string_view>)>& collector);
+namespace nvr {
+    void
+    parserelation(const std::string &filename, const std::function<void(std::vector<std::string_view>)> &collector);
+}
 
 #endif //KGER_RELATION_PARSER_H

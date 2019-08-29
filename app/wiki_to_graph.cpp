@@ -24,7 +24,7 @@ std::shared_ptr<Graph> build_graph(std::shared_ptr<Vocabulary> vocabulary, const
         b.relation_collector(finds);
     };
     for (const auto &filename:ttl_list) {
-        parserelation(filename, lambda);
+        nvr::parserelation(filename, lambda);
     }
     std::cout << *b.graph << std::endl;
     std::cout << "Pruning graph" << std::endl;

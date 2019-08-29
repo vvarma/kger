@@ -27,8 +27,13 @@ struct Stack : public torch::data::transforms::Collation<SequenceExample> {
 struct GraphDataset : public torch::data::datasets::Dataset<GraphDataset, SequenceExample> {
     torch::Device device;
     std::shared_ptr<SequenceLabelDataset> datasetInternal;
+    std::vector<size_t> idx;
 
     GraphDataset(std::shared_ptr<SequenceLabelDataset>, torch::Device device);
+
+    GraphDataset(std::shared_ptr<SequenceLabelDataset>, torch::Device device, std::vector<size_t> idx);
+
+    std::vector<GraphDataset> split(std::vector<float> splits);
 
     SequenceExample get(size_t index) override;
 

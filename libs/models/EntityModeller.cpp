@@ -10,8 +10,9 @@ EntityModellerImpl::EntityModellerImpl(int max_num_tokens, int label_count) :
         lstm(register_module("lstm", torch::nn::LSTM(torch::nn::LSTMOptions(128, 128).batch_first(true)))),
         inner_model(register_module("inner", torch::nn::Sequential(
                 torch::nn::Linear(128, label_count),
-                torch::nn::Functional(static_cast<torch::Tensor(*)(const torch::Tensor &, int64_t)>(torch::log_softmax),
-                                      0)
+                torch::nn::Functional(torch::log_softmax, 0, torch::kFloat32)
+//                torch::nn::Functional(static_cast<torch::Tensor(*)(const torch::Tensor &, int64_t)>(torch::log_softmax),
+//                                      0)
         ))) {
 }
 

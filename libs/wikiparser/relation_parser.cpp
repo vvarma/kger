@@ -34,7 +34,7 @@ std::vector<std::string_view> parse_line(std::string_view line) {
     return finds;
 }
 
-void parserelation(const std::string &filename,
+void nvr::parserelation(const std::string &filename,
                             const std::function<void(std::vector<std::string_view>)> &collector) {
     std::ifstream ifile;
     ifile.open(filename);
@@ -47,3 +47,4 @@ void parserelation(const std::string &filename,
         }
     }
 }
+

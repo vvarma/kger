@@ -6,6 +6,7 @@
 #include <iostream>
 #include <models/model.h>
 #include <models/trainer.h>
+#include <graph/graph_io.h>
 
 //
 // Created by nvr on 30/7/19.
@@ -29,7 +30,7 @@ std::shared_ptr<Graph> build_graph(std::shared_ptr<Vocabulary> vocabulary, const
         b.relation_collector(finds);
     };
     for (const auto &filename:ttl_list) {
-        parserelation(filename, lambda);
+        nvr::parserelation(filename, lambda);
     }
     std::cout << *b.graph << std::endl;
     std::cout << "Pruning graph" << std::endl;
@@ -77,16 +78,21 @@ int main(int argc, char *argv[]) {
     options.add_options("debug")("timeit", "capture time info of each parse run", cxxopts::value<bool>());
     auto results = options.parse(argc, argv);
     auto vocabulary = get_vocabulary(results["spm_model"].as<std::string>());
-    auto graph = build_graph(vocabulary, results["ttl_list"].as<std::vector<std::string>>());
+
+    GraphSaveOptions gso;
+    gso.output_path = "/tmp/kger";
+    auto graph = load(gso);
+    if (!graph) {
+        graph = build_graph(vocabulary, results["ttl_list"].as<std::vector<std::string>>());
+        save(graph, gso);
+        std::cout << "saved graph" << std::endl;
+    } else {
+        std::cout << "Loaded graph" << std::endl;
+        std::cout << *graph << std::endl;
+    }
     auto dataset = build_dataset(graph);
     ModelOptions training_options{};
     training_options.max_num_tokens = vocabulary->get_num_tokens();
     train(dataset, training_options);
-//    for (int i = 0; i < 10; ++i) {
-//        auto e = dataset.get(i);
-//        std::cout << "example " << i << std::endl;
-//        std::cout << e.data << std::endl;
-//        std::cout << e.target << std::endl;
-//    }
 }
 
