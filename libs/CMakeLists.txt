@@ -1,0 +1,4 @@
+add_subdirectory(wikiparser)
+add_subdirectory(vocabulary)
+add_subdirectory(graph)
+add_subdirectory(models)
