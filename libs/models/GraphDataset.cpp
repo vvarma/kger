@@ -50,7 +50,7 @@ torch::Tensor GraphDataset::labelWeights() const {
     return torch::tensor(w, torch::TensorOptions().device(device).requires_grad(false));
 }
 
-std::vector<GraphDataset> GraphDataset::split(std::vector<float> splits) {
+std::vector<GraphDataset> GraphDataset::split(const std::vector<float>& splits) {
     std::vector<GraphDataset> datasets;
     size_t start = 0;
     for (float split : splits) {
@@ -58,6 +58,7 @@ std::vector<GraphDataset> GraphDataset::split(std::vector<float> splits) {
         std::vector<size_t> idx_dataset(to - start);
         std::copy(idx.begin() + start, idx.begin() + to, idx_dataset.begin());
         datasets.emplace_back(datasetInternal, device, idx_dataset);
+        start = to;
     }
     return datasets;
 }

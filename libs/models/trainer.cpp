@@ -1,7 +1,3 @@
-#include <utility>
-
-#include <utility>
-
 //
 // Created by nvr on 28/8/19.
 //
@@ -9,14 +5,16 @@
 #include "models/trainer.h"
 #include <torch/torch.h>
 #include <GraphDataset.h>
+#include <ostream>
 #include "EntityModeller.h"
 
-std::tuple<GraphDataset, GraphDataset, GraphDataset> split_dataset(GraphDataset &dataset, std::vector<float> splits) {
-    auto split_dataset = dataset.split(std::move(splits));
+std::tuple<GraphDataset, GraphDataset, GraphDataset>
+split_dataset(GraphDataset &dataset, const std::vector<float> &splits) {
+    auto split_dataset = dataset.split(splits);
     return std::make_tuple(split_dataset[0], split_dataset[1], split_dataset[2]);
 }
 
-void print_accuracy(std::string mode, torch::data::Iterator<SequenceExample> begin,
+void print_accuracy(const std::string &mode, torch::data::Iterator<SequenceExample> begin,
                     const torch::data::Iterator<SequenceExample> &end,
                     EntityModeller &model, int epoch, int max_epoch, int batch_num) {
 
@@ -41,6 +39,89 @@ void print_accuracy(std::string mode, torch::data::Iterator<SequenceExample> beg
             mode.c_str(),
             correct_cases / num_cases);
 
+}
+
+struct ConfusionBuilder {
+    std::map<int, size_t> tp;
+    std::map<int, size_t> fp;
+    std::map<int, size_t> fn;
+
+    void add(int predicted, int actual) {
+        if (predicted == actual) {
+            if (tp.find(predicted) == tp.end())
+                tp[predicted] = 1;
+            else
+                tp[predicted]++;
+        } else {
+            if (fp.find(predicted) == fp.end())
+                fp[predicted] = 1;
+            else
+                fp[predicted]++;
+            if (fn.find(actual) == fn.end())
+                fn[actual] = 1;
+            else
+                fn[actual]++;
+        }
+    }
+
+    friend std::ostream &operator<<(std::ostream &os, const ConfusionBuilder &builder) {
+        std::set<int> keys;
+        for (const auto &p:builder.tp) {
+            keys.insert(p.first);
+        }
+        for (const auto &p:builder.fn) {
+            keys.insert(p.first);
+        }
+        for (const auto &p:builder.fp) {
+            keys.insert(p.first);
+        }
+        os << "label, tp, fp, fn\n";
+        for (const auto &k:keys) {
+            os << k << ", ";
+            {
+                auto v = builder.tp.find(k);
+                if (v == builder.tp.end())
+                    os << 0;
+                else
+                    os << v->second;
+            }
+            os << ", ";
+            {
+                auto v = builder.fp.find(k);
+                if (v == builder.fp.end())
+                    os << 0;
+                else
+                    os << v->second;
+            }
+            os << ", ";
+            {
+                auto v = builder.fn.find(k);
+                if (v == builder.fn.end())
+                    os << 0;
+                else
+                    os << v->second;
+            }
+            os << std::endl;
+        }
+        return os;
+    }
+};
+
+void confusions(torch::data::Iterator<SequenceExample> begin, const torch::data::Iterator<SequenceExample> &end,
+                EntityModeller &model) {
+    ConfusionBuilder confusion_builder;
+    while (begin != end) {
+        auto batch = *begin;
+        auto op = model(batch.data, batch.sizes);
+        auto predicted = torch::argmax(op, 1);
+        auto targets = batch.labels;
+        auto batch_size = targets.sizes()[0];
+        for (int i = 0; i < batch_size; ++i) {
+            confusion_builder.add(predicted[i].item<int>(), targets[i].item<int>());
+        }
+        ++begin;
+    }
+    std::cout << confusion_builder;
 }
 
 void train(std::shared_ptr<SequenceLabelDataset> sequence_label_dataset, const ModelOptions &options) {
@@ -86,4 +167,7 @@ void train(std::shared_ptr<SequenceLabelDataset> sequence_label_dataset, const M
                        batch_index);
 
     }
+    std::cout << "Saving trained model to " << options.model_save_path;
+    torch::save(builder, options.model_save_path);
+    confusions(test_loader->begin(), test_loader->end(), builder);
 }

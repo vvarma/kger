@@ -33,7 +33,7 @@ struct GraphDataset : public torch::data::datasets::Dataset<GraphDataset, Sequen
 
     GraphDataset(std::shared_ptr<SequenceLabelDataset>, torch::Device device, std::vector<size_t> idx);
 
-    std::vector<GraphDataset> split(std::vector<float> splits);
+    std::vector<GraphDataset> split(const std::vector<float>& splits);
 
     SequenceExample get(size_t index) override;
 
