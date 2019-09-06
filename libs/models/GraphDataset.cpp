@@ -13,9 +13,16 @@ SequenceExample GraphDataset::get(size_t index) {
     v.resize(datasetInternal->max_token_length, 0);
     std::vector<int> nv(v.begin(), v.begin() + 80);
     auto t = torch::tensor(nv, torch::TensorOptions().dtype(torch::kInt64).requires_grad(false).device(device));
-    auto l = torch::scalar_tensor(datasetInternal->label_map[datasetInternal->labels[i]],
-                                  torch::TensorOptions().dtype(torch::kLong).requires_grad(
-                                          false).device(device));
+    std::vector<int> labels;
+    labels.resize(get_label_count(), -1);
+    for (int j = 0; j < datasetInternal->labels[i].size(); ++j) {
+        labels[j] = datasetInternal->label_map[datasetInternal->labels[i][j]];
+    }
+
+    auto l = torch::tensor(labels, torch::TensorOptions().dtype(torch::kLong).requires_grad(false).device(device));
+//    auto l = torch::scalar_tensor(,
+//                                  torch::TensorOptions().dtype(torch::kLong).requires_grad(
+//                                          false).device(device));
     auto s = torch::scalar_tensor(static_cast<long>(v.size()),
                                   torch::TensorOptions().dtype(torch::kLong).requires_grad(false).device(device));
     return SequenceExample(t, s, l);
@@ -50,7 +57,7 @@ torch::Tensor GraphDataset::labelWeights() const {
     return torch::tensor(w, torch::TensorOptions().device(device).requires_grad(false));
 }
 
-std::vector<GraphDataset> GraphDataset::split(const std::vector<float>& splits) {
+std::vector<GraphDataset> GraphDataset::split(const std::vector<float> &splits) {
     std::vector<GraphDataset> datasets;
     size_t start = 0;
     for (float split : splits) {

@@ -62,7 +62,10 @@ std::shared_ptr<SequenceLabelDataset> build_dataset(const std::shared_ptr<Graph>
                                 std::set<std::shared_ptr<LexicalNode>> lns) -> void {
         for (const auto &ln:lns) {
             for (const auto &nen:nens) {
-                dataset->collect(ln->tokens, nen->unique_id());
+                // only one level Up
+                auto l = nen->parents;
+                l.push_back(nen->unique_id());
+                dataset->collect(ln->tokens, l);
             }
         }
     };

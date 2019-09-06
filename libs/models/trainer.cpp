@@ -17,7 +17,6 @@ split_dataset(GraphDataset &dataset, const std::vector<float> &splits) {
 void print_accuracy(const std::string &mode, torch::data::Iterator<SequenceExample> begin,
                     const torch::data::Iterator<SequenceExample> &end,
                     EntityModeller &model, int epoch, int max_epoch, int batch_num) {
-
     int num_cases = 0;
     float correct_cases = 0;
     while (begin != end) {
@@ -38,7 +37,6 @@ void print_accuracy(const std::string &mode, torch::data::Iterator<SequenceExamp
             batch_num,
             mode.c_str(),
             correct_cases / num_cases);
-
 }
 
 struct ConfusionBuilder {
@@ -156,16 +154,17 @@ void train(std::shared_ptr<SequenceLabelDataset> sequence_label_dataset, const M
         for (SequenceExample &batch : *train_loader) {
             builder->zero_grad();
             auto op = builder(batch.data, batch.sizes);
-            auto loss = torch::nll_loss(op, batch.labels, label_weights);
+//            auto loss = torch::nll_loss(op, batch.labels, label_weights);
+            auto loss = torch::multilabel_margin_loss(op, batch.labels);
             loss.backward();
             optimizer.step();
             ++batch_index;
         }
+        std::cout << "done" << std::endl;
         print_accuracy("Training", train_loader->begin(), train_loader->end(), builder, epoch, options.num_epochs,
                        batch_index);
         print_accuracy("Testing", test_loader->begin(), test_loader->end(), builder, epoch, options.num_epochs,
                        batch_index);
-
     }
     std::cout << "Saving trained model to " << options.model_save_path;
     torch::save(builder, options.model_save_path);
