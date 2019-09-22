@@ -16,9 +16,9 @@ std::shared_ptr<Vocabulary> get_vocabulary(std::string model_path) {
     return vocabulary;
 }
 
-std::shared_ptr<Graph> build_graph(std::shared_ptr<Vocabulary> vocabulary, const std::vector<std::string> &ttl_list) {
+std::shared_ptr<Graph> build_graph(std::shared_ptr<Vocabulary> vocabulary, const std::vector<std::string> &ttl_list, const std::string& ontologies) {
     GraphBuilder b(std::move(vocabulary));
-    b.parse_ontologies("/home/nvr/CLionProjects/kger/data/ontology.owl");
+    b.parse_ontologies(ontologies);
 
     auto lambda = [&b](std::vector<std::string_view> finds) -> void {
         b.relation_collector(finds);
@@ -54,11 +54,12 @@ int main(int argc, char *argv[]) {
     cxxopts::Options options("KGer2", "Building KGs from TTLs");
     options.add_options()
             ("ttl_list", "ttl file to parse and add", cxxopts::value<std::vector<std::string >>())
+            ("ontologies","Ontology file to parse named entities", cxxopts::value<std::string>())
             ("spm_model", "sentencepiece model to tokenize", cxxopts::value<std::string>());
     options.add_options("debug")("timeit", "capture time info of each parse run", cxxopts::value<bool>());
     auto results = options.parse(argc, argv);
     auto vocabulary = get_vocabulary(results["spm_model"].as<std::string>());
-    auto graph = build_graph(vocabulary, results["ttl_list"].as<std::vector<std::string >>());
+    auto graph = build_graph(vocabulary, results["ttl_list"].as<std::vector<std::string >>(), results["ontologies"].as<std::string>());
     GraphSaveOptions gso;
     gso.output_path = "/tmp/kger";
     save(graph, gso);
