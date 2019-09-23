@@ -11,7 +11,7 @@ https://wiki.dbpedia.org/downloads-2016-10#p10608-2
 - Text tokenization is done using a sentencepiece model that was trained from scratch on the same text data.
 - The code uses libTorch - the c++ API for PyTorch
 
-The model gives an accuracy of
+The model gives an accuracy of ~68%
 
 ### Future work
 - The hierarchial nature of the ontology is not captured well with a multi-class classifier. A multi-label classifier is more suitable.
