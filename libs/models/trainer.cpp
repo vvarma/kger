@@ -154,13 +154,11 @@ void train(std::shared_ptr<SequenceLabelDataset> sequence_label_dataset, const M
         for (SequenceExample &batch : *train_loader) {
             builder->zero_grad();
             auto op = builder(batch.data, batch.sizes);
-//            auto loss = torch::nll_loss(op, batch.labels, label_weights);
-            auto loss = torch::multilabel_margin_loss(op, batch.labels);
+            auto loss = torch::nll_loss(op, batch.labels, label_weights);
             loss.backward();
             optimizer.step();
             ++batch_index;
         }
-        std::cout << "done" << std::endl;
         print_accuracy("Training", train_loader->begin(), train_loader->end(), builder, epoch, options.num_epochs,
                        batch_index);
         print_accuracy("Testing", test_loader->begin(), test_loader->end(), builder, epoch, options.num_epochs,

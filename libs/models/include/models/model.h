@@ -12,11 +12,11 @@ struct SequenceLabelDataset {
     int label_count;
     int max_token_length;
     std::vector<std::vector<int>> tokens;
-    std::vector<std::vector<key_type>> labels;
+    std::vector<key_type> labels;
     std::map<key_type, int> label_map;
     std::map<key_type, int> label_count_map;
 
-    void collect(std::vector<int> tokens, std::vector<key_type> label);
+    void collect(std::vector<int> tokens, key_type label);
 };
 
 

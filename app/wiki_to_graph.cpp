@@ -4,9 +4,13 @@
 #include <wikiparser/relation_parser.h>
 #include <graph/graph_io.h>
 
-//
-// Created by nvr on 24/8/19.
-//
+/*
+ * Takes as input a set of .ttl files, an .owl file and a sentence piece model.
+ * Creates a graph of Named Entities, Instances and Tokenized text nodes.
+ * Prunes the graph such that each instance has atleast one associated named entity and text node.
+ * Finally, serializes the graph in protobuf format and persists to disk.
+ * */
+
 std::shared_ptr<Vocabulary> get_vocabulary(std::string model_path) {
     auto vocabulary = std::make_shared<Vocabulary>(model_path);
     if (!vocabulary->ok) {
@@ -49,7 +53,6 @@ std::shared_ptr<Graph> build_graph(std::shared_ptr<Vocabulary> vocabulary, const
     std::cout << *b.graph << std::endl;
     return b.graph;
 }
-
 int main(int argc, char *argv[]) {
     cxxopts::Options options("KGer2", "Building KGs from TTLs");
     options.add_options()
