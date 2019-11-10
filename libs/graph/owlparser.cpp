@@ -5,7 +5,8 @@
 #include "owlparser.h"
 
 
-void OntologyBuilder::processChildSecondPass(xmlDocPtr doc, xmlNodePtr cur, std::shared_ptr<NamedEntityNode> current_node) {
+void
+OntologyBuilder::processChildSecondPass(xmlDocPtr doc, xmlNodePtr cur, std::shared_ptr<NamedEntityNode> current_node) {
     if (xmlStrEqual(cur->name, (const xmlChar *) "Class") == 1) {
         std::string resource;
         auto prop = cur->properties;
@@ -63,6 +64,12 @@ void OntologyBuilder::processChildSecondPass(xmlDocPtr doc, xmlNodePtr cur, std:
             auto parent = node_cache.find(resource);
             if (parent != node_cache.end()) {
                 current_node->parents.push_back(parent->second);
+//            } else {
+//                auto localyUndefinedParent = std::make_shared<NamedEntityNode>(resource);
+//                localyUndefinedParent->label = resource;
+//                nodes[localyUndefinedParent->unique_id()] = localyUndefinedParent;
+//                node_cache[localyUndefinedParent->resource] = localyUndefinedParent->unique_id();
+//                current_node->parents.push_back(localyUndefinedParent->unique_id());
             }
         }
     }

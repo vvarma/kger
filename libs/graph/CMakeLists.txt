@@ -6,7 +6,7 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS graph_io.proto)
 #include_directories(${LIBXML2_INCLUDE_DIR})
 add_definitions(${LIBXML2_DEFINITIONS})
 
-add_library(${PROJECT_NAME} STATIC node.cpp unique_id.cpp owlparser.cpp nodebuilder.cpp graph_io.cpp ${PROTO_SRCS} ${PROTO_HDRS})
+add_library(${PROJECT_NAME} STATIC node.cpp unique_id.cpp owlparser.cpp nodebuilder.cpp graph_io.cpp hex_node_visitor.cpp ${PROTO_SRCS} ${PROTO_HDRS})
 add_library(libs::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 target_include_directories(${PROJECT_NAME}
         PUBLIC
@@ -19,6 +19,19 @@ target_include_directories(${PROJECT_NAME}
         ${PROTOBUF_INCLUDE_DIRS}
         ${CMAKE_CURRENT_BINARY_DIR}
         )
-target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES} ${Protobuf_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${LIBXML2_LIBRARIES} ${Protobuf_LIBRARIES} libs::hex)
 SET(${PROJECT_NAME}_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/include
         CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
+
+add_executable(hex_ne_test hex_ne_test.cpp)
+target_link_libraries(hex_ne_test ${PROJECT_NAME} gtest ${LIBXML2_LIBRARIES} glog)
+target_include_directories(hex_ne_test
+        PUBLIC
+        $<INSTALL_INTERFACE:include>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}
+        ${LIBXML2_INCLUDE_DIR}
+        )
+enable_testing()
+add_test(HEXNETest hex_ne_test ${CMAKE_CURRENT_LIST_DIR}/testdata/ontology.owl)

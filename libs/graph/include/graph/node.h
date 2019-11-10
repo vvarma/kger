@@ -104,6 +104,8 @@ struct Graph {
 
     void collect(const std::function<void(std::shared_ptr<InstanceNode>, std::set<std::shared_ptr<NamedEntityNode>>,
                                           std::set<std::shared_ptr<LexicalNode>>)> &collector);
+
+    void visit_all(NodeVisitor *visitor);
 };
 
 std::ostream &operator<<(std::ostream &os, Graph const &m);

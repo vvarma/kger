@@ -1,3 +1,5 @@
+#include <utility>
+
 //
 // Created by nvr on 29/7/19.
 //
@@ -63,7 +65,7 @@ void LexicalNode::accept(NodeVisitor *visitor) {
     visitor->visit(shared_from_this());
 }
 
-LexicalNode::LexicalNode(has_unique_id::uid id, std::vector<int> tokens) : Node(id), tokens(tokens) {
+LexicalNode::LexicalNode(has_unique_id::uid id, std::vector<int> tokens) : Node(id), tokens(std::move(tokens)) {
 
 }
 
@@ -150,5 +152,19 @@ void Graph::collect(const std::function<void(std::shared_ptr<InstanceNode>, std:
         }
         collector(in, nens, lns);
     }
+}
+
+void Graph::visit_all(NodeVisitor *nodeVisitor) {
+    for (const auto &p:instances) {
+        p.second->accept(nodeVisitor);
+    }
+    for (const auto &p:lexicals) {
+        p.second->accept(nodeVisitor);
+    }
+    for (const auto &p:named_entities) {
+        p.second->accept(nodeVisitor);
+    }
+
+
 }
 
